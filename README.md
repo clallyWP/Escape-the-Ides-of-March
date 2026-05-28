@@ -124,10 +124,11 @@ function drawMap(){
 
 // LOCATIONS (ZONES)
 const locations = [
-  {x:700,y:50,name:"Senate",visited:false},
-  {x:400,y:100,name:"Forum",visited:false},
-  {x:650,y:400,name:"Temple",visited:false},
-  {x:100,y:350,name:"Colosseum",visited:false}
+const locations = [
+  {x:700,y:50,name:"Senate",visited:false,questionsDone:0},
+  {x:400,y:100,name:"Forum",visited:false,questionsDone:0},
+  {x:650,y:400,name:"Temple",visited:false,questionsDone:0},
+  {x:100,y:350,name:"Colosseum",visited:false,questionsDone:0}
 ];
 
 // DRAW
@@ -154,7 +155,7 @@ function draw(){
   ctx.fillText("Awareness: "+awareness,10,20);
 
   document.getElementById("counter").innerText =
-	"Questions left: "+(20-currentQ);
+	"Questions left:” + (24-currentQ) 
 }
 
 // MOVE (smooth Zelda-style)
@@ -171,9 +172,39 @@ function checkInteraction(){
 
   locations.forEach(l=>{
 	if(distance(caesar,l)<40 && !l.visited){
-  	triggerQuestion(l);
-	}
-  });
+ 
+function triggerQuestion(location){
+
+  // ✅ If game is complete → go to boss
+  if(currentQ >= 24){
+	endGame();
+	return;
+  }
+
+  // ✅ Only allow 6 questions per location
+  if(location.questionsDone >= 6){
+	alert(location.name + " is complete. Move to another location!");
+	return;
+  }
+
+  let ans = prompt(questions[currentQ]);
+
+  if(Number(ans) === answers[currentQ]){
+	awareness++;
+	alert("✅ Correct! The plot becomes clearer...");
+  } else {
+	alert("❌ Incorrect...");
+  }
+
+  currentQ++;
+  location.questionsDone++;
+
+  // ✅ Mark location complete
+  if(location.questionsDone >= 6){
+	location.visited = true;
+	alert("🏛️ You have completed " + location.name + "!");
+  }
+
 }
 
 // DISTANCE CHECK
@@ -259,7 +290,16 @@ function endGame(){
 // LOOP
 function loop(){
   move();
-  checkInteraction();
+  function checkInteraction(){
+  if(!keys[" "]) return;
+
+  locations.forEach(l=>{
+	if(distance(caesar,l) < 40){
+  	triggerQuestion(l);
+	}
+  });
+}
+);
   draw();
   requestAnimationFrame(loop);
 }
@@ -270,3 +310,4 @@ loop();
 </body>
 </html>
 ``
+
